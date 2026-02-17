@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FF.SPACE | Premium Fulfillment</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        
+        :root {
+            --cosmic-purple: #7c3aed;
+            --deep-dark: #050505;
+        }
+
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--deep-dark);
+            color: #ffffff;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .fixed-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background-image: 
+                linear-gradient(rgba(5, 5, 10, 0.9), rgba(5, 5, 10, 0.95)),
+                url('https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=2000');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .video-wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            background: #000;
+        }
+
+        .video-wrapper video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.45;
+        }
+
+        .nav-glass {
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .wa-widget {
+            width: 34px;
+            height: 34px;
+            background: rgba(37, 211, 102, 0.1);
+            border: 1px solid rgba(37, 211, 102, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #25d366;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            cursor: pointer;
+        }
+
+        .wa-widget:hover {
+            background: rgba(37, 211, 102, 0.25);
+            transform: scale(1.15);
+        }
+
+        .wa-widget::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 1px solid rgba(37, 211, 102, 0.5);
+            animation: pulse-wa 2s infinite;
+        }
+
+        @keyframes pulse-wa {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(1.8); opacity: 0; }
+        }
+
+        .btn-main {
+            background: var(--cosmic-purple);
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 7px 16px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: 0.3s;
+        }
+
+        h1 { font-size: 2.3rem !important; font-weight: 800; line-height: 1.1; }
+        h2 { font-size: 1.6rem !important; font-weight: 700; }
+        p { font-size: 0.78rem !important; opacity: 0.6; line-height: 1.6; }
+        .label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.3em; color: var(--cosmic-purple); font-weight: 800; }
+
+        .card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 24px;
+            border-radius: 10px;
+        }
+
+        section { min-height: 100vh; display: flex; align-items: center; padding: 100px 0; }
+
+        .footer-label {
+            font-size: 0.55rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            color: var(--cosmic-purple);
+            margin-bottom: 12px;
+            font-weight: 800;
+        }
+
+        .footer-text {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.4);
+            line-height: 1.8;
+        }
+
+        .edit-mode [contenteditable="true"] { 
+            background: rgba(124, 58, 237, 0.08);
+            outline: 1px dashed var(--cosmic-purple);
+        }
+
+        #videoSettings {
+            display: none;
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: rgba(15, 15, 15, 0.98);
+            border: 1px solid var(--cosmic-purple);
+            padding: 15px;
+            border-radius: 8px;
+            z-index: 1000;
+            width: 280px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="fixed-background"></div>
+
+    <div id="videoSettings">
+        <label class="text-[9px] uppercase font-bold text-purple-400 mb-2 block tracking-widest">URL MP4 Видео:</label>
+        <input type="text" id="videoUrlInput" class="w-full bg-black border border-white/10 p-2 text-[10px] rounded mb-3 text-white outline-none focus:border-purple-500" placeholder="https://site.com/video.mp4">
+        <button onclick="updateVideoSource()" class="w-full bg-purple-600 text-[10px] py-2 rounded font-bold uppercase tracking-tighter">Обновить фон</button>
+    </div>
+
+    <!-- Навигация -->
+    <nav class="fixed w-full z-50 nav-glass">
+        <div class="max-w-6xl mx-auto px-6 flex justify-between items-center py-3">
+            <div class="flex items-center space-x-10">
+                <a href="#home" class="text-xl font-black italic tracking-tighter jump-link">FF<span class="text-purple-500">.</span>SPACE</a>
+                <div class="hidden md:flex space-x-6 text-[9px] font-bold uppercase tracking-[0.2em] text-white/30">
+                    <a href="#home" class="hover:text-white transition jump-link">Главная</a>
+                    <a href="#marpla" class="hover:text-white transition jump-link">Marpla</a>
+                    <a href="#services" class="hover:text-white transition jump-link">Сервис</a>
+                    <a href="#contact" class="hover:text-white transition jump-link">Заявка</a>
+                </div>
+            </div>
+            <div class="flex items-center space-x-5">
+                <div id="waButton" class="wa-widget" title="WhatsApp">
+                    <i class="fa-brands fa-whatsapp"></i>
+                </div>
+                <a href="tel:+74950000000" class="text-[10px] font-bold opacity-60 hidden sm:block" contenteditable="true">+7 495 000 00 00</a>
+                <a href="#contact" class="btn-main jump-link">Связаться</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Слайд 1: Главная -->
+    <section id="home">
+        <div class="video-wrapper">
+            <video autoplay muted loop playsinline id="mainVideo">
+                <source src="https://assets.mixkit.co/videos/preview/mixkit-conveyor-belt-in-a-large-warehouse-33042-large.mp4" type="video/mp4">
+            </video>
+        </div>
+        <div class="max-w-6xl mx-auto px-6 z-10">
+            <div class="max-w-xl">
+                <div class="label mb-4" contenteditable="true">Next Gen Fulfillment</div>
+                <h1 class="mb-6" contenteditable="true">Фулфилмент с <br><span class="text-purple-500">цифровым</span> ДНК</h1>
+                <p class="mb-8" contenteditable="true">
+                    Прозрачные процессы, видео-отчетность и автоматизированная сборка. Мы берем на себя операционку, чтобы вы фокусировались на масштабировании продаж.
+                </p>
+                <div class="flex items-center gap-5">
+                    <a href="#contact" class="btn-main px-10 py-3 jump-link">Рассчитать проект</a>
+                    <div class="w-px h-6 bg-white/10"></div>
+                    <span class="text-[8px] uppercase tracking-widest opacity-40" contenteditable="true">Склады класса А <br>в Москве и области</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Слайд 2: Marpla -->
+    <section id="marpla" class="bg-black/75">
+        <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-2 gap-16 items-center">
+            <div>
+                <div class="label mb-4" contenteditable="true">Partnership</div>
+                <h2 class="mb-6" contenteditable="true">Интеграция с <span class="text-purple-500">Marpla</span></h2>
+                <p contenteditable="true">
+                    Единственный фулфилмент в России, работающий в прямой связке с аналитикой Marpla. Мы помогаем синхронизировать ваши поставки с рекламным кабинетом.
+                </p>
+            </div>
+            <div class="grid grid-cols-2 gap-5">
+                <div class="card">
+                    <div class="text-2xl font-black text-purple-500 mb-1">x3.0</div>
+                    <div class="text-[8px] uppercase opacity-40">Скорость оборота</div>
+                </div>
+                <div class="card">
+                    <div class="text-2xl font-black text-purple-500 mb-1">0%</div>
+                    <div class="text-[8px] uppercase opacity-40">Потерь товара</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Слайд 3: Услуги -->
+    <section id="services">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <div class="label mb-3" contenteditable="true">Capabilities</div>
+                <h2 contenteditable="true">Наши услуги</h2>
+            </div>
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="card">
+                    <i class="fa-solid fa-camera text-purple-500 mb-4 text-xl"></i>
+                    <h3 class="text-[10px] font-bold uppercase mb-3 tracking-widest" contenteditable="true">Видеофиксация</h3>
+                    <p contenteditable="true">Записываем процесс сборки каждой единицы. Исключаем споры с маркетплейсами.</p>
+                </div>
+                <div class="card border-purple-500/20">
+                    <i class="fa-solid fa-qrcode text-purple-500 mb-4 text-xl"></i>
+                    <h3 class="text-[10px] font-bold uppercase mb-3 tracking-widest" contenteditable="true">Маркировка</h3>
+                    <p contenteditable="true">Стикеры, ШК, Честный Знак. Полное соответствие регламентам WB и Ozon.</p>
+                </div>
+                <div class="card">
+                    <i class="fa-solid fa-truck-fast text-purple-500 mb-4 text-xl"></i>
+                    <h3 class="text-[10px] font-bold uppercase mb-3 tracking-widest" contenteditable="true">Доставка</h3>
+                    <p contenteditable="true">Ежедневные отгрузки. Ваши товары попадают на витрину максимально быстро.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Слайд 4: Контакты -->
+    <section id="contact">
+        <div class="max-w-md mx-auto px-6 w-full">
+            <div class="card p-10 relative">
+                <div class="text-center mb-8">
+                    <h2 class="!text-xl mb-2" contenteditable="true">Оставить заявку</h2>
+                    <p contenteditable="true">Ответим в течение 15 минут в рабочее время.</p>
+                </div>
+                <form class="space-y-4" onsubmit="return false;">
+                    <input type="text" placeholder="ВАШЕ ИМЯ" class="w-full bg-white/5 border border-white/10 p-4 rounded text-[10px] tracking-widest outline-none focus:border-purple-500 transition uppercase">
+                    <input type="tel" placeholder="ТЕЛЕФОН" class="w-full bg-white/5 border border-white/10 p-4 rounded text-[10px] tracking-widest outline-none focus:border-purple-500 transition">
+                    <button type="button" class="w-full btn-main py-4 text-[10px]">Отправить запрос</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- НОВЫЙ ФУТЕР С КОНТАКТАМИ -->
+    <footer class="bg-black/90 pt-16 pb-12 border-t border-white/5">
+        <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-4 gap-12">
+            <!-- Инфо об ИП -->
+            <div class="col-span-1">
+                <div class="text-lg font-black italic mb-6 tracking-tighter">FF<span class="text-purple-500">.</span>SPACE</div>
+                <div class="footer-label">Юридическая информация</div>
+                <div class="footer-text" contenteditable="true">
+                    ИП Константинопольский К. К.<br>
+                    ИНН: 000000000000<br>
+                    ОГРНИП: 00000000000000
+                </div>
+            </div>
+            
+            <!-- Адреса -->
+            <div class="col-span-1">
+                <div class="footer-label">Наш адрес</div>
+                <div class="footer-text" contenteditable="true">
+                    г. Москва, ул. Складская, д. 10<br>
+                    Технопарк «Восток», Блок Б<br>
+                    Проезд через КПП №2
+                </div>
+            </div>
+
+            <!-- Режим работы -->
+            <div class="col-span-1">
+                <div class="footer-label">График работы</div>
+                <div class="footer-text" contenteditable="true">
+                    Склад: Круглосуточно 24/7<br>
+                    Офис: Пн-Пт 09:00 — 18:00<br>
+                    Отгрузки: Ежедневно
+                </div>
+            </div>
+
+            <!-- Контакты -->
+            <div class="col-span-1">
+                <div class="footer-label">Связаться</div>
+                <div class="footer-text mb-4" contenteditable="true">
+                    Email: info@ff.space<br>
+                    Telegram: @ff_space_bot
+                </div>
+                <div class="flex space-x-4 opacity-50">
+                    <i class="fa-brands fa-vk text-sm"></i>
+                    <i class="fa-brands fa-youtube text-sm"></i>
+                    <i class="fa-brands fa-instagram text-sm"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="max-w-6xl mx-auto px-6 mt-16 text-center border-t border-white/5 pt-8">
+            <div class="text-[7px] uppercase tracking-[0.5em] opacity-20">
+                © 2025 FF.SPACE — MODERN FULFILLMENT SYSTEMS. ALL RIGHTS RESERVED.
+            </div>
+        </div>
+    </footer>
+
+    <!-- Управление -->
+    <div class="fixed bottom-8 right-8 flex gap-3 z-[100]">
+        <button onclick="toggleEdit()" id="editBtn" class="w-12 h-12 bg-white text-black rounded-full flex items-center justify-center transition shadow-2xl">
+            <i class="fa-solid fa-pen text-xs"></i>
+        </button>
+        <button onclick="saveFile()" class="w-12 h-12 bg-purple-600 text-white rounded-full flex items-center justify-center transition shadow-2xl">
+            <i class="fa-solid fa-download text-xs"></i>
+        </button>
+    </div>
+
+    <script>
+        const config = { whatsappNumber: "79000000000" };
+
+        // Плавный скролл (JS)
+        document.querySelectorAll('.jump-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                const href = this.getAttribute('href');
+                if (href.startsWith('#')) {
+                    e.preventDefault();
+                    const target = document.querySelector(href);
+                    if (target) {
+                        const offset = 70;
+                        const bodyRect = document.body.getBoundingClientRect().top;
+                        const elementRect = target.getBoundingClientRect().top;
+                        const elementPosition = elementRect - bodyRect;
+                        const offsetPosition = elementPosition - offset;
+
+                        window.scrollTo({
+                            top: offsetPosition,
+                            behavior: 'smooth'
+                        });
+                    }
+                }
+            });
+        });
+
+        // WhatsApp
+        document.getElementById('waButton').addEventListener('click', () => {
+            window.open(`https://wa.me/${config.whatsappNumber}`, '_blank');
+        });
+
+        // Видео
+        function updateVideoSource() {
+            const url = document.getElementById('videoUrlInput').value;
+            const video = document.getElementById('mainVideo');
+            if (url && url.trim() !== "") {
+                video.innerHTML = `<source src="${url}" type="video/mp4">`;
+                video.load();
+                video.play();
+            }
+        }
+
+        // Редактор
+        let isEdit = false;
+        function toggleEdit() {
+            isEdit = !isEdit;
+            document.querySelectorAll('[contenteditable]').forEach(el => el.setAttribute('contenteditable', isEdit));
+            const btn = document.getElementById('editBtn');
+            const settings = document.getElementById('videoSettings');
+            btn.style.background = isEdit ? '#7c3aed' : '#fff';
+            btn.style.color = isEdit ? '#fff' : '#000';
+            settings.style.display = isEdit ? 'block' : 'none';
+        }
+
+        function saveFile() {
+            if(isEdit) toggleEdit();
+            const html = document.documentElement.outerHTML;
+            const blob = new Blob([html], {type: 'text/html'});
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'ff_space_site_v2.html';
+            a.click();
+        }
+
+        window.onload = () => { document.getElementById('mainVideo').play().catch(() => {}); };
+    </script>
+</body>
+</html>
